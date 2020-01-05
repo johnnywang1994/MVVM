@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>MVVM test</title>
+  <script src="src/jw-observer.js"></script>
+  <script src="src/jw-watcher.js"></script>
+  <script src="src/jw-compiler.js"></script>
+  <script src="src/jw-mvvm.js"></script>
+</head>
+<body>
+  <div id="app">
+    Hello World
+    <h3 jw-on:click="showThis">Title</h3>
+
+    <div>
+      <button jw-on:click="toggleName">Toggle</button>
+      <p jw-show="showName">{{ name }}</p>
+    </div>
+  </div>
+
+  <script>
+  const vm = new MVVM({
+    el: '#app',
+    data: {
+      name: 'Johnny',
+      age: 30,
+      showName: true
+    },
+    computed: {
+      info: {
+        get() {
+          return this.name + ' ' + this.age;
+        },
+        set(nV) {
+          console.log(nV);
+        }
+      }
+    },
+    methods: {
+      showThis(e) {
+        console.log(e);
+      },
+      toggleName() {
+        this.showName = !this.showName;
+      }
+    },
+    created() {
+      console.log(document.getElementById('app').innerHTML);
+    },
+    mounted() {
+      console.log(document.getElementById('app').innerHTML);
+    }
+  });
+  </script>
+</body>
+</html>

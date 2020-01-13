@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <script src="Observer.js"></script>
+  <script src="Watcher.js"></script>
+  <script src="Compiler.js"></script>
+  <script src="Component.js"></script>
+</head>
+<body>
+  <div id="app">
+    <p>This is app p tag.</p>
+  </div>
+
+  <script>
+  const BoxDemo = new Component('box-demo', {
+    shadow: true,
+    stylesheet: './box-demo.css',
+    html: `
+      <div>
+        <h3 w-on:click="click">{{ title }}</h3>
+        <p w-text="msg"></p>
+      </div>
+    `
+  });
+  const data = {
+    title: 'This is title',
+    msg: 'Wow',
+    click() {
+      console.log(this);
+    }
+  };
+  const app = new BoxDemo(data);
+  </script>
+</body>
+</html>

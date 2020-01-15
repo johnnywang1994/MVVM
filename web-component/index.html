@@ -29,17 +29,30 @@
       <div>
         <h3 w-on:click="click">{{ title }}</h3>
         <p w-text="msg"></p>
-        <:my-btn props="Hello"></:my-btn>
+        <% btn %>
       </div>
     `
   });
 
+  const btn = new MyButton({
+    data: {
+      text: 'button'
+    }
+  });
+
   // 建立新標籤實例
   const app = new BoxDemo({
-    title: 'This is title',
-    msg: 'Content',
-    click() {
-      console.log(this);
+    data: {
+      title: 'This is title',
+      msg: 'Content'
+    },
+    methods: {
+      click() {
+        console.log({ a: this });
+      }
+    },
+    components: {
+      btn
     }
   });
   </script>

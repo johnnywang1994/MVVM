@@ -1,6 +1,6 @@
-function Compiler(el, { data, prefix }) {
+function Compiler(el, { vm, prefix }) {
   this.$el = this.isElementNode(el) ? el : document.querySelector(el);
-  this.$data = data;
+  this.$vm = vm;
   this.$prefix = prefix;
   if (this.$el) {
     this.init();
@@ -34,14 +34,14 @@ Compiler.prototype = {
       const attrName = attr.name;
       if (self.isDirective(attrName)) {
         const dir = attrName.substring(self.$prefix.length + 1); // +1 因為 v- 的 -
-        const exp = attr.value;
+        const exp = attr.value.trim();
         // 事件屬性
         if (self.isEventDirective(dir)) {
-          self.directives['eventHandler'](node, self._getDataVal(exp), dir, self.$data);
+          self.directives['eventHandler'](node, self._getVMVal(exp), dir, self.$vm);
         // 一般
         } else {
-          self.directives[dir](node, self._getDataVal(exp));
-          new Watcher(this.$data, exp, function(value) {
+          self.directives[dir](node, self._getVMVal(exp));
+          new Watcher(this.$vm, exp, function(value) {
             self.directives[dir](node, value);
           });
         }
@@ -52,23 +52,23 @@ Compiler.prototype = {
   },
   // 2. 字串編譯：比對字串中所有用到的 exp，加入監聽器
   compileText(node) {
-    const text = node.textContent,
+    const text = node.textContent.trim(),
       self = this,
-      reg = /\{\{(.*)\}\}/;
-    if (reg.test(text)) {
-      const { exps, value } = self.render(text.trim(), self.$data);
+      regTxt = /\{\{(.*)\}\}/;
+    if (regTxt.test(text)) {
+      const { exps, value } = self.renderText(text, self.$vm);
       self.directives.text(node, value);
       // 字串節點中，所有用到的 exp 都需依序加入監聽器
       exps.forEach((exp) => {
-        new Watcher(this.$data, exp, function() {
-          const { value } = self.render(text.trim(), self.$data);
+        new Watcher(this.$vm, exp, function() {
+          const { value } = self.renderText(text, self.$vm);
           self.directives.text(node, value);
         });
       });
     }
   },
   // 依據給予的 data 對傳入的字串進行模板編譯，返回編譯後的內容及使用的 exp 值
-  render(str, data) {
+  renderText(str, data) {
     const self = this;
     let exps = null;
     str = String(str);
@@ -107,8 +107,8 @@ Compiler.prototype = {
   hasChildNodes(node) {
     return node.childNodes && node.childNodes.length;
   },
-  _getDataVal(exp) {
-    let val = this.$data;
+  _getVMVal(exp) {
+    let val = this.$vm;
     exp = exp.split('.');
     exp.forEach((k) => {
       val = val[k];
@@ -122,6 +122,9 @@ Compiler.prototype = {
     },
     html(node, value) {
       node.innerHTML = value;
+    },
+    replace(node, value) {
+      node.parentNode.replaceChild(value, node);
     },
     show(node, value) {
       node.style.display = Boolean(value) ? null : 'none';

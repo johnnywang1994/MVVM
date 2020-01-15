@@ -16,6 +16,12 @@
   </div>
 
   <script>
+  // 全局註冊標籤
+  const MyButton = new Component('my-btn', {
+    shadow: false,
+    html: `<button>{{ text }}</button>`
+  });
+
   const BoxDemo = new Component('box-demo', {
     shadow: true,
     stylesheet: './box-demo.css',
@@ -23,17 +29,19 @@
       <div>
         <h3 w-on:click="click">{{ title }}</h3>
         <p w-text="msg"></p>
+        <:my-btn props="Hello"></:my-btn>
       </div>
     `
   });
-  const data = {
+
+  // 建立新標籤實例
+  const app = new BoxDemo({
     title: 'This is title',
-    msg: 'Wow',
+    msg: 'Content',
     click() {
       console.log(this);
     }
-  };
-  const app = new BoxDemo(data);
+  });
   </script>
 </body>
 </html>

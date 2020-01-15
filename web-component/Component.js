@@ -1,11 +1,11 @@
+// listen to web component attribute
+// ref: https://alligator.io/web-components/attributes-properties/
 function Component(tagName, opts) {
   this.$tagName = tagName;
   this.$opts = opts;
-  this.$root = null;
-  this.$el = null;
-  this.$data = null;
+  this.$webcomponent = null;
   this.init();
-  return this.$el;
+  return this.$webcomponent;
 }
 
 Component.prototype = {
@@ -15,36 +15,37 @@ Component.prototype = {
   defineTag() {
     const self = this;
     const { html } = self.$opts;
-    self.$el = class extends HTMLElement {
-      constructor(data) {
+    /* 閉包實例，data, el, root 屬性為私有 */
+    self.$webcomponent = class extends HTMLElement {
+      constructor(_props) {
         super();
         // get el, data
         const el = self.getNode(html);
-        self.$data = data;
+        const data = this.$props = _props || JSON.parse(this.getAttribute('props').replace(/'/g, '"'));
+        const root = this.$root = self.initRoot(this);
         // set MVVM
-        new Observer(self.$data);
+        new Observer(data);
         new Compiler(el, {
-          data: self.$data,
+          data,
           prefix: self.$opts.prefix || 'w'
         });
         // set Web Component
-        self.initRoot(this);
-        self.insertStyle();
-        self.$root.appendChild(el);
+        self.insertStyle(root);
+        root.appendChild(el);
       }
     }
-    customElements.define(self.$tagName, self.$el);
+    customElements.define(self.$tagName, self.$webcomponent);
   },
-  initRoot(__root) {
+  initRoot(originalRoot) {
     const useShadow = document.head.attachShadow && this.$opts.shadow;
-    this.$root = useShadow ? __root.attachShadow({mode: 'open'}) : __root;
+    return useShadow ? originalRoot.attachShadow({mode: 'open'}) : originalRoot;
   },
-  insertStyle() {
+  insertStyle(root) {
     if (this.$opts.stylesheet) {
       const linkEl = document.createElement('link');
       linkEl.setAttribute('rel', 'stylesheet');
       linkEl.setAttribute('href', this.$opts.stylesheet);
-      this.$root.appendChild(linkEl);
+      root.appendChild(linkEl);
     }
   },
   /* Tool */

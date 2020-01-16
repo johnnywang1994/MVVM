@@ -253,10 +253,19 @@
     this.init();
     return this.$webcomponent;
   }
+
+  Webc.getModule = function(tagName) {
+    return Webc.prototype.$modules[tagName];
+  }
+
+  Webc.getComponent = function(name) {
+    return Webc.prototype.$components[name];
+  }
   
   Webc.prototype = {
     init() {
       this.defineTag();
+      this.setModule(this.$tagName, this.$webcomponent);
     },
     defineTag() {
       const self = this;
@@ -268,7 +277,7 @@
           super();
           // handle options
           const _opts = this.$options = options || {};
-          const { data, computed, methods, components, customize } = _opts;
+          const { name, data, computed, methods, components, customize } = _opts;
           this.$data = data || {};
           this.$computed = computed;
           this.$methods = methods;
@@ -292,6 +301,7 @@
           this.insertStyle(this.$root, _opts);
           customize && typeof customize === 'funciton' && customize.call(this);
           this.$root.appendChild(this.$el);
+          self.setComponent(name || self.$tagName, this);
         }
   
         initRoot(originalRoot, options) {
@@ -369,6 +379,18 @@
           return target.$components[key];
         }
       });
+    },
+
+    /* Module methods */
+    $modules: {},
+    $components: {},
+    setModule(tagName, data) {
+      if (Webc.prototype.$modules[tagName]) return console.error('[Webc]: Dont redefined module.');
+      return Webc.prototype.$modules[tagName] = data;
+    },
+    setComponent(name, data) {
+      if (Webc.prototype.$components[name]) return console.error('[Webc]: Dont redefined component.');
+      return Webc.prototype.$components[name] = data;
     }
   };
 

@@ -4,59 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
-  <script src="../webc.min.js"></script>
+  <title>Demo Usage</title>
+  <link rel="stylesheet" href="./css/global.css">
+  <script src="../webc.js"></script>
+  <script src="modules.js"></script>
 </head>
 <body>
-  <div id="app">
-    <p>This is app p tag.</p>
-  </div>
-
-  <script>
-  // 全局註冊標籤
-  const MyButton = new Webc('my-btn', {
-    html: `<button>Button</button>`
-  });
-
-  const BoxDemo = new Webc('box-demo', {
-    html: `
-      <div>
-        <h3 w-on:click="click">{{ title }}</h3>
-        <p w-text="msg" w-show="show"></p>
-        <% btn %>
-      </div>
-    `
-  });
-
-  const btn = new MyButton({
-    shadow: true,
-    stylesheet: './box-demo.css',
-    customize() {
-      Object.defineProperty(this, 'observedAttributes', {
-        get() {
-          return ['props'];
-        }
-      });
-    }
-  });
-
-  // 建立新標籤實例
-  const app = new BoxDemo({
-    data: {
-      title: 'This is title',
-      msg: 'Content',
-      show: false
-    },
-    methods: {
-      click(e) {
-        console.log(this);
-        console.log(e);
-      }
-    },
-    components: {
-      btn
-    }
-  });
-  </script>
+  <!-- App -->
+  <script src="./components/Topbar.js"></script>
+  <script src="./components/Content.js"></script>
+  <script src="index.js"></script>
 </body>
 </html>

@@ -45,6 +45,10 @@ document.body.appendChild(Btn);
 
 The `Btn` is now a vanilla JS DOM node, we can control it whatever we want.
 
+When create component, we should give it a unique name for system to store it.
+
+If name is not defined, system will use the Module Name to name it.
+
 
 
 #### Literal Template
@@ -61,6 +65,7 @@ const MyButton = new Webc('my-button', {
 });
 
 const Btn = new MyButton({
+  name: 'my-button',
   data: {
     text: 'Button'
   }
@@ -264,3 +269,15 @@ const btn = new MyButton({
   }
 });
 ```
+
+
+
+#### getModule, getComponent
+
+When use `new Webc()` or `new SomeModule()`，it'll automatically store them into Webc system,
+
+When you want to use them, easily call `Webc.getModule()` or `Webc.getComponent()` to get the target.
+
+Letting us seperate the Modules, Components defining full of flexibility. By using IIFE, we can avoid the 
+
+global side effects too.

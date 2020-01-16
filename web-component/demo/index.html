@@ -5,10 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Document</title>
-  <script src="Observer.js"></script>
-  <script src="Watcher.js"></script>
-  <script src="Compiler.js"></script>
-  <script src="Component.js"></script>
+  <script src="../webc.min.js"></script>
 </head>
 <body>
   <div id="app">
@@ -17,26 +14,29 @@
 
   <script>
   // 全局註冊標籤
-  const MyButton = new Component('my-btn', {
-    shadow: false,
-    html: `<button>{{ text }}</button>`
+  const MyButton = new Webc('my-btn', {
+    html: `<button>Button</button>`
   });
 
-  const BoxDemo = new Component('box-demo', {
-    shadow: true,
-    stylesheet: './box-demo.css',
+  const BoxDemo = new Webc('box-demo', {
     html: `
       <div>
         <h3 w-on:click="click">{{ title }}</h3>
-        <p w-text="msg"></p>
+        <p w-text="msg" w-show="show"></p>
         <% btn %>
       </div>
     `
   });
 
   const btn = new MyButton({
-    data: {
-      text: 'button'
+    shadow: true,
+    stylesheet: './box-demo.css',
+    customize() {
+      Object.defineProperty(this, 'observedAttributes', {
+        get() {
+          return ['props'];
+        }
+      });
     }
   });
 
@@ -44,11 +44,13 @@
   const app = new BoxDemo({
     data: {
       title: 'This is title',
-      msg: 'Content'
+      msg: 'Content',
+      show: false
     },
     methods: {
-      click() {
-        console.log({ a: this });
+      click(e) {
+        console.log(this);
+        console.log(e);
       }
     },
     components: {

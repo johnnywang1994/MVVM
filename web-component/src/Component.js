@@ -23,14 +23,14 @@ Component.prototype = {
       constructor(options) {
         super();
         // handle options
-        const _opts = options;
-        const { data, computed, methods, components } = _opts;
-        this.$data = data || JSON.parse(this.getAttribute('data').replace(/'/g, '"'));
+        const _opts = this.$options = options || {};
+        const { data, computed, methods, components, customize } = _opts;
+        this.$data = data || {};
         this.$computed = computed;
         this.$methods = methods;
         this.$components = components;
         this.$el = self.getNode(html);
-        this.$root = self.initRoot(this);
+        this.$root = this.initRoot(this, _opts);
         this.$vm = Object.create(null); // 整合對外接口
 
         // set MVVM
@@ -45,23 +45,26 @@ Component.prototype = {
         });
         
         // set Web Component
-        self.insertStyle(this.$root);
+        this.insertStyle(this.$root, _opts);
+        customize && customize.call(this);
         this.$root.appendChild(this.$el);
+      }
+
+      initRoot(originalRoot, options) {
+        const useShadow = document.head.attachShadow && options.shadow;
+        return useShadow ? originalRoot.attachShadow({mode: 'open'}) : originalRoot;
+      }
+
+      insertStyle(root, options) {
+        if (options.stylesheet) {
+          const linkEl = document.createElement('link');
+          linkEl.setAttribute('rel', 'stylesheet');
+          linkEl.setAttribute('href', options.stylesheet);
+          root.appendChild(linkEl);
+        }
       }
     }
     customElements.define(self.$tagName, self.$webcomponent);
-  },
-  initRoot(originalRoot) {
-    const useShadow = document.head.attachShadow && this.$opts.shadow;
-    return useShadow ? originalRoot.attachShadow({mode: 'open'}) : originalRoot;
-  },
-  insertStyle(root) {
-    if (this.$opts.stylesheet) {
-      const linkEl = document.createElement('link');
-      linkEl.setAttribute('rel', 'stylesheet');
-      linkEl.setAttribute('href', this.$opts.stylesheet);
-      root.appendChild(linkEl);
-    }
   },
 
   /* Tool */

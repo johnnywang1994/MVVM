@@ -12,7 +12,7 @@
     html: `
       <div class="topbar">
         <ul>
-          <li>Home</li>
+          <li w-show="show">Home</li>
           <li>About</li>
           <li>Contact</li>
         </ul>

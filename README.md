@@ -3,31 +3,31 @@
 
 
 
-### ==背景==
+### 背景
 
 某天閒來無事時，剛好搜尋到一篇介紹 MVVM 的好文，仔細閱讀後覺得收穫頗多，決定將一些想法跟理解記錄下來所誕生。
 
 
 
-### ==概要==
+### 概要
 
 將該篇文章所講的主要概念轉為我自己的理解並記錄實作步驟。話不多說，動手開始吧。
 
 
 
-### ==何謂 MVVM？==
+### 何謂 MVVM？
 
 在實作之前，先簡單提一下什麼是 `MVVM`，它是一種軟體設計架構的模式，會在 Model 及 View 之間建立一層 ViewModel，來幫助 Model 及 View 之間的交互操作，可以簡化開發的一些繁瑣重複的動作。
 
 
 
-### ==Front End 與 MVVM 有何關係？==
+### Front End 與 MVVM 有何關係？
 
 在 Front End 開發上，撇除 CSS 不談，最主要的工作就是將資料數據渲染在畫面上，而在瀏覽器中，也配置有許多這類型的方法，統稱為 `Element Methods`，這些 methods 在 MVC 的架構下，就是負責處理 Model 與 View 的交互，JQuery 主要也就是在做這件事情，但這些 methods 始終都必須要透過人工的操作來完成交互，而 MVVM 的架構下，就是將這些繁瑣的動作都交由 ViewModel 來代勞，我們只需要處理及更新資料，ViewModel 會根據更新的資料去完成更新 View 的動作。
 
 
 
-### ==實作練習==
+### 實作練習
 
 
 #### 實作前說明
@@ -61,7 +61,7 @@
 
 首先第一步來看 Observer 是怎麼做到劫持資料的，主要是使用 `defineProperty` 屬性來對物件的所有屬性進行遞回劫持，包括子屬性與新值，初步實踐如下：
 
-```javascript=
+```javascript
 function observe(data) {
   if (!data || typeof data !== 'object') return;
   Object.keys(data).forEach((key) => defineReactive(data, key, data[key]));
@@ -89,7 +89,7 @@ function DefineReactive(data, key, val) {
 
 以上已可初步劫持資料的變化了，但一個單一資料可能會被用在多個地方，我們需要一個獨立的地方來儲存每一個資料的 watchers（被用一次必須產生一個新 watcher 去處理），因此我們需要一個訂閱器來儲存 watchers，訂閱器代碼如下：
 
-```javascript=
+```javascript
 function Dep() {
   this.subs = [];
 }
@@ -108,7 +108,7 @@ Dep.prototype = {
 
 接著，因為每個資料都必須創建一個新的訂閱器來儲存屬於他自己的所有 watchers，所以具體在剛剛 `defineReactive` 方法中使用如下：
 
-```javascript=
+```javascript
 // 上略...
 
 function DefineReactive(data, key, val) {
@@ -130,7 +130,7 @@ function DefineReactive(data, key, val) {
 
 完成通知的設定後，還剩下一個問題，==怎麼添加 watchers 給 dep？==，剛剛有提到，每個資料都有屬於自己的訂閱器實例，訂閱器是在 `defineReactive` 方法中創建的，也就是說加入 watcher 的動作必定是在閉包內進行，因此，我們先假設後續會透過在 `Dep.target`屬性中掛載 watcher 實例，此時就把它加入進去 dep 中。
 
-```javascript=
+```javascript
 function DefineReactive(data, key, val) {
   const dep = new Dep(); // 訂閱器
   observe(val);
@@ -155,7 +155,7 @@ function DefineReactive(data, key, val) {
 
 在 Compiler 中，我們主要會需要知道編譯的對象，以及拿來編譯的資料，再根據節點類型做對應的編譯方式，另外由於初次編譯會大量操作到 DOM 節點，我們會先將需要編譯的元素轉為文檔碎片 Fragment 的形式處理，待最後解析編譯完成後再一次塞回原來的元素中，具體實踐如下：
 
-```javascript=
+```javascript
 function Compiler(el, data) {
   this.$el = el;
   this.$data = data;
@@ -184,7 +184,7 @@ Compiler.prototype = {
 
 接著，來完成解析節點的 `compileElement` 方法，其中 `_getDataVal`用來取得屬性內容裡寫的物件路徑，並返回該路徑的資料：
 
-```javascript=
+```javascript
 Compiler.prototype = {
   // 上略...
   // 第一步：分析節點類型
@@ -276,7 +276,7 @@ Compiler.prototype = {
 
 標籤模板編譯的實踐方式也有很多，常見的像是直接比對法，或是正則比對法等等，我們這次使用的是 new Function 的方式，用正則比對並將字串替換後放入 new Function 來幫助我們編譯字串中的所有變數，render 方法代碼如下：
 
-```javascript=
+```javascript
 function removeWrapper(arr) {
   let ret = [];
   arr.forEach((exp) => {
@@ -309,7 +309,7 @@ function render(str, data) {
 
 我們將剛剛上面的 render 函數加入 prototype 中，並繼續完成 `compileText` 方法：
 
-```javascript=
+```javascript
 Compiler.prototype = {
   // 上略...
   // 第一步：分析節點類型
@@ -388,7 +388,7 @@ Compiler.prototype = {
 
 以上我們已經完成了基本的初次編譯了，接下來要在每個編譯動作完成時，都加入一個 watcher 來幫助我們之後更新資料時，能夠再次進行局部編譯的動作，因此我們將 `compile` 及 `compileText` 方法做點修改如下：
 
-```javascript=
+```javascript
 Compiler.prototype = {
   // 上略...
   compile(node) {
@@ -440,7 +440,7 @@ Compiler.prototype = {
 
 經過 Compiler 的實作後，接下來最重要的 Watcher 扮演著串起 Compiler 及 Observer 溝通的橋樑，也是整個 MVVM 的靈魂，前面最開頭我們提到了在 `Dep.target` 上掛載 watcher 實例，接著必須在創建 watcher 實例時，對指定的資料進行一次 get 的動作，才能強制將 watcher 加入訂閱器中，具體實現如下：
 
-```javascript=
+```javascript
 function Watcher(data, exp, cb) {
   this.$data = data;
   this.$exp = exp;
@@ -490,7 +490,7 @@ Watcher.prototype = {
 
 MVVM 的角色就是，將前面所有模組組合起來，使用 Observer 劫持資料變化，透過 Compiler 解析編譯模板，透過 Watcher 完成 Observer 對 Compiler 的聯繫，另外最重要的就是將所有資料綁定到 MVVM 的實例上，方便使用者輕鬆使用，具體構造器代碼如下：
 
-```javascript=
+```javascript
 function MVVM(options) {
   this.$options;
   this.$data = this.$options.data;
@@ -560,7 +560,7 @@ MVVM.prototype = {
 
 到此，一個簡單的 MVVM 架構算是完成了，實際已可簡單編譯模板以及加入事件了，使用範例如下：
 
-```htmlmixed=
+```html
 <div id="app">
   Hello World
   <h3>Title</h3>
@@ -573,7 +573,7 @@ MVVM.prototype = {
 </div>
 ```
 
-```javascript=
+```javascript
 const vm = new MVVM({
   el: '#app',
   data: {

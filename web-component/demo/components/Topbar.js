@@ -4,6 +4,9 @@
   new MyTopbar({
     name: 'top-bar',
     shadow: true,
-    stylesheet: './css/topbar.css'
+    stylesheet: './css/topbar.css',
+    data: {
+      show: true
+    }
   });
 })();

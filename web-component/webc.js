@@ -101,7 +101,14 @@
       let val = this.$vm;
       exp = exp.split('.');
       exp.forEach((k) => {
-        val = val[k];
+        let re = /\[(\d+)\]/gi;
+        if (re.test(k)) {
+          let _k = k.split('[')[0];
+          let _i = k.split('[')[1].replace(']', '');
+          val = val[_k][_i];
+        } else {
+          val = val[k];
+        }
       });
       return val;
     }
@@ -146,6 +153,9 @@
           // event
           if (self.isEventDirective(dir)) {
             self.directives['eventHandler'](node, self._getVMVal(exp), dir, self.$vm);
+          // for
+          } else if (self.isForLoop(dir)) {
+            self.directives[dir].call(self, node, exp, attrName);
           // normal
           } else {
             self.directives[dir](node, self._getVMVal(exp));
@@ -208,14 +218,27 @@
     isEventDirective(dir) {
       return dir.indexOf('on') === 0;
     },
+    isForLoop(dir) {
+      return dir === 'for';
+    },
     hasChildNodes(node) {
       return node.childNodes && node.childNodes.length;
+    },
+    copyDescriptors(obj) {
+      return Object.create({}, Object.getOwnPropertyDescriptors(obj));
     },
     _getVMVal(exp) {
       let val = this.$vm;
       exp = exp.split('.');
       exp.forEach((k) => {
-        val = val[k];
+        let re = /\[(\d+)\]/gi;
+        if (re.test(k)) {
+          let _k = k.split('[')[0];
+          let _i = k.split('[')[1].replace(']', '');
+          val = val[_k][_i];
+        } else {
+          val = val[k];
+        }
       });
       return val;
     },
@@ -232,6 +255,32 @@
       },
       show(node, value) {
         node.style.display = Boolean(value) ? null : 'none';
+      },
+      for(node, value, attrName) {
+        const self = this;
+        const itemKey = value.split('in')[0].trim();
+        const exp = value.split('in')[1].trim();
+        const arr = self._getVMVal(exp);
+        let i, l;
+        node.removeAttribute(attrName);
+        if (Array.isArray(arr)) {
+          for (i = 0, l = arr.length; i < l; i++) {
+            let newNode = node.cloneNode(true);
+            let newData = {
+              [itemKey]: arr[i]
+            };
+            new Observer(newData);
+            new Compiler(newNode, {
+              vm: newData,
+              prefix: self.$prefix
+            });
+            new Watcher(self.$vm, `${exp}[${i}]`, function(value) {
+              newData[itemKey] = value;
+            });
+            node.parentNode.appendChild(newNode);
+          }
+          node.parentNode.removeChild(node);
+        }
       },
       eventHandler(node, value, dir, vm) {
         const eventType = dir.split(':')[1];

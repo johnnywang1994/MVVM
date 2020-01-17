@@ -131,10 +131,17 @@ Compiler.prototype = {
     let val = this.$vm;
     exp = exp.split('.');
     exp.forEach((k) => {
-      val = val[k];
+      let re = /\[(\d+)\]/gi;
+      if (re.test(k)) {
+        let _k = k.split('[')[0];
+        let _i = k.split('[')[1].replace(']', '');
+        val = val[_k][_i];
+      } else {
+        val = val[k];
+      }
     });
     return val;
-  },
+  }
   // 指令設定
   directives: {
     text(node, value) {

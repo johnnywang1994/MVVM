@@ -189,7 +189,7 @@
       const t = function(str) {
         const re = /\{\{\s*([^\}]+)?\s*\}\}/g;
         exps = self.removeWrapper(str.match(re));
-        str = str.replace(re, '" + data.$1 + "');
+        str = str.replace(re, '" + (data.$1 ? data.$1 : "{{ $1}}") + "');
         return new Function('data', 'return "'+ str +'";');
       };
       let r = t(str);
@@ -266,20 +266,24 @@
         if (Array.isArray(arr)) {
           for (i = 0, l = arr.length; i < l; i++) {
             let newNode = node.cloneNode(true);
-            let newData = {
+            let localData = {
               [itemKey]: arr[i]
             };
-            new Observer(newData);
+            new Observer(localData);
             new Compiler(newNode, {
-              vm: newData,
+              vm: localData,
               prefix: self.$prefix
             });
             new Watcher(self.$vm, `${exp}[${i}]`, function(value) {
-              newData[itemKey] = value;
+              localData[itemKey] = value;
             });
             node.parentNode.appendChild(newNode);
           }
-          node.parentNode.removeChild(node);
+          // next frame remove
+          setTimeout(() => {
+            self.compileElement(node.parentNode);
+            node.parentNode.removeChild(node);
+          }, 0);
         }
       },
       eventHandler(node, value, dir, vm) {

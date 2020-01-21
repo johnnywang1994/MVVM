@@ -597,6 +597,8 @@ const vm = new MVVM({
 以上，就是基本 MVVM 的概念流程實作，當然文中有許多地方一定還可以改善寫法或不夠周全的部分，也請各路高手多多包涵，本文僅作為 MVVM 加深理解以及筆記的方式存在，再次感謝您的閱讀～
 
 參考文獻：
-[Model-View-ViewModel](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel)
-[剖析Vue实现原理 - 如何实现双向绑定mvvm](https://github.com/DMQ/mvvm)
-[js 模板编译的实现](https://www.yukapril.com/2017/01/09/js-template-compile.html)
+  - [Model-View-ViewModel](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel)
+
+  - [剖析Vue实现原理 - 如何实现双向绑定mvvm](https://github.com/DMQ/mvvm)
+
+  - [js 模板编译的实现](https://www.yukapril.com/2017/01/09/js-template-compile.html)

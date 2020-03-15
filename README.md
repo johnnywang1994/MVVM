@@ -602,3 +602,6 @@ const vm = new MVVM({
   - [剖析Vue实现原理 - 如何实现双向绑定mvvm](https://github.com/DMQ/mvvm)
 
   - [js 模板编译的实现](https://www.yukapril.com/2017/01/09/js-template-compile.html)
+
+
+## 2020 - 03 新增 Component 及 prop 功能

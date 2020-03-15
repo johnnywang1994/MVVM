@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VM</title>
+  <script src="Watcher.js"></script>
+  <script src="Observer.js"></script>
+  <script src="Compiler.js"></script>
+  <script src="VM.js"></script>
+  <script src="Component.js"></script>
+</head>
+<body>
+  <div id="app">
+    <ul>
+      <li m-on:click="this.changeTab(1)">CHange to 1</li>
+      <li m-on:click="this.changeTab(2)">CHange to 2</li>
+    </ul>
+    <div m-bind:show="this.nowTab === 1">
+      Content 1, {{ this.name }}
+    </div>
+    <div m-bind:show="this.nowTab === 2">
+      <navbar m-bind:info="this.info" wowo="momo"></navbar>
+    </div>
+    <!-- <p>{{ this.name }}</p> -->
+  </div>
+
+  <script>
+    const comp = new Component('navbar', {
+      template: '<div class="navbar">{{ this.info }}</div>',
+      props: ['info'],
+      data() {
+        return {
+          msg: '錯誤拉'
+        };
+      },
+    });
+
+    const app = new ViewModel({
+      el: document.getElementById('app'),
+      data: {
+        nowTab: 1,
+        name: 'Johnny',
+        age: '24',
+      },
+      computed: {
+        info() {
+          return this.name + ' ' + this.age;
+        }
+      },
+      methods: {
+        changeTab(num) {
+          this.nowTab = num;
+        },
+      },
+      components: {
+        navbar: comp,
+      },
+    });
+    console.log(app);
+  </script>
+</body>
+</html>

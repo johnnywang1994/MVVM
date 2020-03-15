@@ -141,7 +141,7 @@ Compiler.prototype = {
       }
     });
     return val;
-  }
+  },
   // 指令設定
   directives: {
     text(node, value) {

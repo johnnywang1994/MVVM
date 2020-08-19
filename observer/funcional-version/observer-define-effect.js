@@ -102,15 +102,15 @@ function computed(getter) {
   return {
     get value() {
       const applyNewEffect = effectCache[effectCache.length-1];
-      // 首次取值，掛載當前 effect
+      // 首次取值，runner 掛載當前 effect
       if (!initAttach) {
-        value = runner();
-        needCache = false;
+        runner()
         initAttach = true;
       // 後續取值
       // 1. 掛載新 effect(將此 computed 對象用於其他 effect 中)
       // 2. 原依賴值改變(getter 內依賴值改變)
-      } else if (applyNewEffect || needCache) {
+      }
+      if (applyNewEffect || needCache) {
         value = getter();
         needCache = false;
       }

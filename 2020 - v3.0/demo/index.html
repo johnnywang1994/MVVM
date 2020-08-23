@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app">
+    <h3
+      c-html="this.name"
+      c-on:click="this.seen ? this.onSeen : this.onHide"
+    ></h3>
+    <button c-on:click="() => this.seen = !this.seen">Toggle</button>
+    <p c-for="num in this.list">
+      <span c-on:click="() => this.onFor(this.num)">{{ this.name + this.num.id }}</span>
+    </p>
+    <test></test>
+    <div>
+      <p c-on:click="this.addItem">Change Name</p>
+      {{ this.list.length }}
+      <a c-bind:href="this.link" target="_blank">
+        Google
+      </a>
+    </div>
+    <test></test>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
+

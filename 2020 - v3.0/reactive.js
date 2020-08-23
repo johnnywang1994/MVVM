@@ -2,6 +2,11 @@ const proxyCache = new WeakMap();
 const trackMap = new WeakMap();
 const effectCache = [];
 
+// reactive
+function isFn(v) {
+  return typeof v === 'function';
+}
+
 function isObject(v) {
   return v !== null && typeof v === 'object';
 }
@@ -171,24 +176,3 @@ function trigger(target, key) {
     });
   }
 }
-
-
-const data = reactive({
-  name: 'johnny',
-  age: 33
-});
-
-// 建立 computed
-const info = computed(() => {
-  console.log('Cache');
-  return data.name + ' ' + data.age;
-});
-
-// 多次呼叫僅取值一次
-console.log(info.value);
-console.log(info.value);
-
-// compute 用於其他 effect 中，呼叫原 getter 方法將此 effect 掛載到原依賴中
-effect(() => {
-  document.getElementById('html').innerHTML = info.value;
-});

@@ -16,6 +16,7 @@ var patch = init([ // Init patch function with chosen modules
 ])
 
 var renderCx = { h, c };
+var uid = 0;
 
 function isFn(v) {
   return typeof v === 'function';
@@ -39,6 +40,7 @@ function getData(data) {
 }
 
 export default function VM(options) {
+  this.uid = uid++;
   this.$options = options;
   this.$vnode = undefined;
   this.$render = options.render;
@@ -56,8 +58,9 @@ export default function VM(options) {
   }
 }
 
-function c(options, propsMap) {
-  const Sub = new VM(options);
+function c(options, propsMap, key) {
+  const { parent } = options;
+  let Sub = parent.$childrens[key] || new VM(options);
   if (propsMap) {
     Sub._setProps(propsMap);
   }
@@ -67,9 +70,14 @@ function c(options, propsMap) {
       patch(Sub.$vnode, vnode);
     }
     Sub.$vnode = vnode;
+    if (!Sub.$el) {
+      Sub.$el = vnode.elm;
+    }
   };
   effect(updateMount);
-  Sub.$parent.$childrens.push(Sub);
+  if (!parent.$childrens[key]) {
+    parent.$childrens.push(Sub);
+  }
   return Sub.$vnode;
 }
 
@@ -126,8 +134,9 @@ VM.prototype._setProps = function(propsMap) {
   if (parent && props) {
     for (let key in propsMap) {
       if (!this.$data[key] && props.includes(key)) {
+        const prop = computed(propsMap[key]);
         Object.defineProperty(this.$data, key, {
-          get: () => propsMap[key],
+          get: () => prop.value,
         });
       }
     }

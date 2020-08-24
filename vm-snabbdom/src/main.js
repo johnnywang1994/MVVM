@@ -37,7 +37,7 @@ const app = new VM({
     const Test = this.$components.test;
     return (
       <div id="app">
-        {c(Test, { testname: this.$data.name })}
+        {c(Test, { testname: () => this.$data.name }, 0)}
         <span>{this.$data.info}</span>
       </div>
     );

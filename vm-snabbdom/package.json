@@ -8,6 +8,8 @@
   },
   "license": "MIT",
   "dependencies": {
+    "global": "^4.4.0",
+    "parcel-bundler": "^1.12.4",
     "snabbdom": "0.7.3"
   },
   "devDependencies": {

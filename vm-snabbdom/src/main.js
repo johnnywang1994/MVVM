@@ -10,7 +10,6 @@ const test = {
   methods: {
     onClick() {
       console.log(this);
-      this.msg = 'Hello Pig';
     }
   },
   render() {
@@ -44,6 +43,6 @@ const app = new VM({
   }
 })
 
-window.app = app;
+console.log(app);
 
-// console.log(app);
+window.app = app;

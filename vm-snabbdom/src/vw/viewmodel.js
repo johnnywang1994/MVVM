@@ -1,46 +1,12 @@
 import { reactive, effect, computed } from './reactive';
-import { init } from 'snabbdom';
-import { classModule } from 'snabbdom/modules/class';
-import { propsModule } from 'snabbdom/modules/props';
-import { attributesModule } from 'snabbdom/modules/attributes';
-import { styleModule } from 'snabbdom/modules/style';
-import { eventListenersModule } from 'snabbdom/modules/eventlisteners';
-import { h } from 'snabbdom/h';
- 
-var patch = init([ // Init patch function with chosen modules
-  classModule, // makes it easy to toggle classes
-  propsModule, // for setting properties on DOM elements
-  attributesModule,
-  styleModule, // handles styling on elements with support for animations
-  eventListenersModule, // attaches event listeners
-])
+import { renderCx, patch } from './vdom';
+import { getEl, getData } from './utils';
 
-var renderCx = { h, c };
-var uid = 0;
+const { h } = renderCx;
+let uid = 0;
 
-function isFn(v) {
-  return typeof v === 'function';
-}
-
-function isObject(v) {
-  return v !== null && typeof v === 'object';
-}
-
-function getEl(el) {
-  return typeof el === 'string'
-    ? document.querySelector(el)
-    : el;
-}
-
-function getData(data) {
-  if (isFn(data)) {
-    return data();
-  }
-  return data || {};
-}
-
-export default function VM(options) {
-  this.uid = uid++;
+function VM(options) {
+  this.uid = ++uid;
   this.$options = options;
   this.$vnode = undefined;
   this.$render = options.render;
@@ -53,32 +19,12 @@ export default function VM(options) {
   this._setComponent();
   this._setMethods();
   this._setComputed();
+  if (this.$parent) {
+    this.$parent.$childrens.push(this);
+  }
   if (this.$el) {
     this.mount();
   }
-}
-
-function c(options, propsMap, key) {
-  const { parent } = options;
-  let Sub = parent.$childrens[key] || new VM(options);
-  if (propsMap) {
-    Sub._setProps(propsMap);
-  }
-  const updateMount = () => {
-    const vnode = Sub.$render.call(Sub, renderCx);
-    if (Sub.$vnode) {
-      patch(Sub.$vnode, vnode);
-    }
-    Sub.$vnode = vnode;
-    if (!Sub.$el) {
-      Sub.$el = vnode.elm;
-    }
-  };
-  effect(updateMount);
-  if (!parent.$childrens[key]) {
-    parent.$childrens.push(Sub);
-  }
-  return Sub.$vnode;
 }
 
 VM.prototype.mount = function(el) {
@@ -166,3 +112,5 @@ VM.prototype._compiler = function(tag, attrs) {
   }
   return h(tag, options, children);
 }
+
+export default VM;

@@ -1,40 +1,7 @@
-const proxyCache = new WeakMap();
-const trackMap = new WeakMap();
-const effectCache = [];
+import { proxyCache, trackMap, effectCache } from './config';
+import { isObject, setArray } from './utils';
 
 // reactive
-function isObject(v) {
-  return v !== null && typeof v === 'object';
-}
-
-function setArray(arr, {
-  push,
-  pop
-}) {
-  Object.defineProperty(arr, 'push', {
-    enumerable: false, // hide from for...in
-    configurable: false, // prevent further meddling...
-    writable: false, // see above ^
-    value: function() {
-      let n = this.length;
-      for (let i = 0, l = arguments.length; i < l; i++, n++) {          
-        push(arguments[i], n, this);
-      }
-      return n;
-    }
-  })
-  Object.defineProperty(arr, 'pop', {
-    enumerable: false, // hide from for...in
-    configurable: false, // prevent further meddling...
-    writable: false, // see above ^
-    value: function() {
-      const item = Array.prototype.pop.call(this);
-      pop(item, null, this);
-      return item;
-    }
-  })
-}
-
 export function reactive(target) {
   return createReactive(target);
 }

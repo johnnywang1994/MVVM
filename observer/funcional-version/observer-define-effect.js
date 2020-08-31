@@ -140,6 +140,16 @@ function computed(getter) {
   };
 }
 
+function watch(target, key, effect) {
+  effectCache.push(effect);
+  if (target[key]._isRef) {
+    target[key].value;
+  } else {
+    track(target, key);
+  }
+  effectCache.pop();
+}
+
 function track(target, key) {
   const effect = effectCache[effectCache.length - 1];
   if (effect) {

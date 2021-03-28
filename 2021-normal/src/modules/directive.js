@@ -82,24 +82,22 @@ const globalDirectives = {
     update(el, binding, vm) {
       const { oldCh, ctn, list: rawList } = binding;
       const list = renderValue(rawList, vm);
-      const newCh = new Map();
+      const aliveItems = [];
       list.forEach((item) => {
         if (oldCh.has(item)) {
           console.log('exist');
-          newCh.set(item, oldCh.get(item));
-          oldCh.delete(item);
+          aliveItems.push(item);
           return;
         }
         const copy = this.buildItem(el, binding, vm, item);
         oldCh.set(item, copy);
+        aliveItems.push(item);
       });
-      // remove oldCh not in new list
-      if (newCh.length) {
-        Object.entries(oldCh).forEach(([, node]) => {
-          ctn.removeChild(node);
-        });
-        binding.oldCh = newCh;
-      }
+      // remove oldCh not in view
+      Object.entries(oldCh).forEach(([item, node]) => {
+        // TODO: not trigger watch effect
+        console.log('remove');
+      })
     },
     buildItem(el, binding, vm, bindItem) {
       const { item: rawItem, ref, ctn } = binding;

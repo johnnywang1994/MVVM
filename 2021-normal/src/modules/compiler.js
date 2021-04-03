@@ -48,6 +48,7 @@ function compileElement(node, vm) {
       node.removeAttribute(name);
       const binding = createBinding(node, attr);
       const $dir = globalDirectives[binding.dir];
+
       if (typeof $dir === 'function') {
         watchEffect(() => $dir(node, binding, vm));
       } else {

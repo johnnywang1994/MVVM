@@ -1,7 +1,97 @@
 import { renderValue } from '@/utils';
 
-function patchChildren(oldCh, ch) {
+function removeNodes (
+  ch,
+  startIdx,
+  endIdx,
+  removeElm,
+) {
+  for (; startIdx <= endIdx; ++startIdx) {
+    const item = ch[startIdx];
+    if (item != null) {
+      removeElm(startIdx);
+    }
+  }
+}
 
+function addNodes (
+  ch,
+  startIdx,
+  endIdx,
+  createElm,
+) {
+  for (; startIdx <= endIdx; ++startIdx) {
+    const item = ch[startIdx];
+    if (item != null) {
+      createElm(item, startIdx);
+    }
+  }
+}
+
+function updateChildrens(oldCh, ch, { el, binding, vm, ctn, nodeMap }) {
+  let oldStartIdx = 0;
+  let newStartIdx = 0;
+  let oldEndIdx = oldCh.length - 1;
+  let newEndIdx = ch.length - 1;
+  let oldStartItem = oldCh[0];
+  let newStartItem = ch[0];
+  let oldEndItem = oldCh[oldEndIdx];
+  let newEndItem = ch[newEndIdx];
+
+  const removeElm = (index) => {
+    ctn.removeChild(nodeMap[index]);
+    oldCh.splice(index, 1);
+    nodeMap.splice(index, 1);
+  };
+
+  const createElm = (item, newIndex, before = null) => {
+    const newStartNode = this.buildItem(el, binding, vm, item);
+    ctn.insertBefore(newStartNode, before);
+    oldCh[newIndex] = item;
+    nodeMap[newIndex] = newStartNode;
+  };
+
+  while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
+    if (oldStartItem == null) {
+      oldStartItem = oldCh[++oldStartIdx];
+    } else if (oldEndItem == null) {
+      oldEndItem = oldCh[--oldEndIdx];
+    } else if (newStartItem == null) {
+      newStartItem = ch[++newStartIdx];
+    } else if (newEndItem == null) {
+      newEndItem = ch[--newEndIdx];
+    // no need to move
+    } else if (oldStartItem === newStartItem) {
+      oldStartItem = oldCh[++oldStartIdx];
+      newStartItem = ch[++newStartIdx];
+    } else if (oldEndItem === newEndItem) {
+      oldEndItem = oldCh[--oldEndIdx];
+      newEndItem = ch[--newEndIdx];
+    // need to move
+    } else if (oldStartItem === newEndItem) {
+      ctn.insertBefore(nodeMap[oldStartIdx], nodeMap[oldEndIdx].nextSibling);
+      oldStartItem = oldCh[++oldStartIdx];
+      newEndItem = ch[--newEndIdx];
+    } else if (oldEndItem === newStartItem) {
+      ctn.insertBefore(nodeMap[oldEndIdx], nodeMap[oldStartIdx]);
+      oldEndItem = oldCh[--oldEndIdx];
+      newStartItem = ch[++newStartIdx];
+    // others
+    } else {
+      const before = nodeMap[oldStartIdx];
+      createElm(newStartItem, newStartIdx, before);
+    }
+  }
+
+  if (oldStartIdx <= oldEndIdx || newStartIdx <= newEndIdx) {
+    if (oldStartIdx > oldEndIdx) {
+      console.log('add!');
+      addNodes(ch, newStartIdx, newEndIdx, createElm);
+    } else {
+      console.log('remove!');
+      removeNodes(oldCh, oldStartIdx, oldEndIdx, removeElm);
+    }
+  }
 }
 
 const globalDirectives = {
@@ -71,36 +161,22 @@ const globalDirectives = {
 
   for: {
     bind(el, binding) {
-      const ref = (binding.ref = document.createComment(''));
+      const ref = (binding.ref = document.createComment('j-for'));
       const ctn = el.parentNode;
       ctn.insertBefore(ref, el);
       ctn.removeChild(el);
       binding.ctn = ref.parentNode;
-      binding.oldCh = new Map();
+      binding.oldCh = [];
+      binding.nodeMap = [];
       el._forloop_ = true;
     },
     update(el, binding, vm) {
-      const { oldCh, ctn, list: rawList } = binding;
+      const { oldCh, ctn, nodeMap, list: rawList } = binding;
       const list = renderValue(rawList, vm);
-      const aliveItems = [];
-      list.forEach((item) => {
-        if (oldCh.has(item)) {
-          console.log('exist');
-          aliveItems.push(item);
-          return;
-        }
-        const copy = this.buildItem(el, binding, vm, item);
-        oldCh.set(item, copy);
-        aliveItems.push(item);
-      });
-      // remove oldCh not in view
-      Object.entries(oldCh).forEach(([item, node]) => {
-        // TODO: not trigger watch effect
-        console.log('remove');
-      })
+      updateChildrens.call(this, oldCh, list, { el, binding, vm, ctn, nodeMap });
     },
     buildItem(el, binding, vm, bindItem) {
-      const { item: rawItem, ref, ctn } = binding;
+      const { item: rawItem } = binding;
       const node = el.cloneNode(true);
       const childVM = vm.extend({
         el: node,
@@ -110,7 +186,7 @@ const globalDirectives = {
           }
         },
       });
-      ctn.insertBefore(node, ref);
+      console.log(childVM);
       return node;
     },
   },

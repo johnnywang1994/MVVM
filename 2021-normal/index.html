@@ -13,7 +13,11 @@
     {{ state.msg }}
     <p j-bind:html="state.htmlStr" j-if="state.showState"></p>
     <div class="todo-list">
-      <div j-for="todo in state.todos" class="todo-item">
+      <div
+        j-for="todo in state.todos"
+        class="todo-item"
+        j-on:click="test"
+      >
         {{ todo.value }}
       </div>
     </div>

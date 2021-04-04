@@ -74,7 +74,6 @@ function defineReactive(target, key, val) {
     },
     set: (newVal) => {
       /* eslint no-param-reassign: 0 */
-      console.log('before-setter');
       if (typeof newVal !== 'object' && val === newVal) return;
       console.log('setter:', target, key);
       val = newVal;

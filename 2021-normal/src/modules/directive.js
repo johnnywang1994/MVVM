@@ -19,11 +19,13 @@ function addNodes (
   startIdx,
   endIdx,
   createElm,
+  injectOld,
 ) {
   for (; startIdx <= endIdx; ++startIdx) {
     const item = ch[startIdx];
     if (item != null) {
       createElm(item, startIdx);
+      injectOld(startIdx);
     }
   }
 }
@@ -37,18 +39,19 @@ function updateChildrens(oldCh, ch, { el, binding, vm, ctn, nodeMap }) {
   let newStartItem = ch[0];
   let oldEndItem = oldCh[oldEndIdx];
   let newEndItem = ch[newEndIdx];
+  const newNodeMap = [];
 
   const removeElm = (index) => {
     ctn.removeChild(nodeMap[index]);
-    oldCh.splice(index, 1);
-    nodeMap.splice(index, 1);
+    // replace old with new
+    oldCh.splice(index, 1, ch[index]);
+    nodeMap.splice(index, 1, newNodeMap[index]);
   };
 
   const createElm = (item, newIndex, before = null) => {
     const newStartNode = this.buildItem(el, binding, vm, item);
     ctn.insertBefore(newStartNode, before);
-    oldCh[newIndex] = item;
-    nodeMap[newIndex] = newStartNode;
+    newNodeMap[newIndex] = newStartNode;
   };
 
   while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
@@ -80,13 +83,20 @@ function updateChildrens(oldCh, ch, { el, binding, vm, ctn, nodeMap }) {
     } else {
       const before = nodeMap[oldStartIdx];
       createElm(newStartItem, newStartIdx, before);
+      newStartItem = ch[++newStartIdx];
     }
   }
+
+  // inject new to old
+  const injectOld = (index) => {
+    oldCh[index] = ch[index];
+    nodeMap[index] = newNodeMap[index];
+  };
 
   if (oldStartIdx <= oldEndIdx || newStartIdx <= newEndIdx) {
     if (oldStartIdx > oldEndIdx) {
       console.log('add!');
-      addNodes(ch, newStartIdx, newEndIdx, createElm);
+      addNodes(ch, newStartIdx, newEndIdx, createElm, injectOld);
     } else {
       console.log('remove!');
       removeNodes(oldCh, oldStartIdx, oldEndIdx, removeElm);
@@ -182,11 +192,12 @@ const globalDirectives = {
         el: node,
         setup() {
           return {
+            ...vm.data,
             [rawItem]: bindItem,
           }
         },
       });
-      console.log(childVM);
+      // console.log(childVM);
       return node;
     },
   },

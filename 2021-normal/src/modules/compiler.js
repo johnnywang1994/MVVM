@@ -86,9 +86,12 @@ function compileTextNode(node, vm) {
 
 export function compile(node, vm) {
   const childs = node.childNodes;
+  if (node === vm.el) {
+    compileElement(node, vm);
+  }
+
   for (let i = 0; i < childs.length; ++i) {
     const child = childs[i];
-
     if (isElementNode(child)) {
       compileElement(child, vm);
     } else if (isTextNode(child)) {

@@ -190,6 +190,8 @@ const globalDirectives = {
       const node = el.cloneNode(true);
       const childVM = vm.extend({
         el: node,
+        // TODO: handle parent to change child setter "target"
+        parent: vm,
         setup() {
           return {
             ...vm.data,

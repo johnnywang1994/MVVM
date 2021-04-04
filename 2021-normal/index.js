@@ -18,9 +18,9 @@ new View({
     };
 
     const addTodo = () => {
-      // state.todos = [...state.todos, { value: 'Sleep' }];
-      state.todos[1] = { value: 'Sleep' };
-      state.todos = state.todos;
+      state.todos = [...state.todos, { value: 'Sleep' }];
+      // state.todos[1] = { value: 'Sleep' };
+      // state.todos = state.todos;
       console.log(state.todos);
     };
 

@@ -99,12 +99,12 @@ function ref(value) {
   const v = {
     _isRef: true,
     get value() {
-      track(v, '');
+      track(v, 'value');
       return _value;
     },
     set value(newVal) {
       _value = newVal;
-      trigger(v, '');
+      trigger(v, 'value');
     },
   };
   return v;
@@ -114,7 +114,7 @@ function reactive(value) {
   return defineReactive(value);
 }
 
-function computed(fn) {
+function computed(fn, setter) {
   let cache;
   let dirty = true;
 
@@ -123,18 +123,24 @@ function computed(fn) {
     scheduler(){
       if (!dirty) {
         dirty = true;
+        trigger(v, 'value');
       }
     },
   });
 
-  return {
+  const v = {
     _isRef: true,
     get value() {
       if (dirty) {
         cache = effect();
         dirty = false;
       }
+      track(v, 'value');
       return cache;
     },
+    set value(newVal) {
+      setter(newVal);
+    },
   };
+  return v;
 }

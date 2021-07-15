@@ -10,6 +10,6 @@ View.prototype.reactive = reactive;
 View.prototype.watchEffect = watchEffect;
 View.prototype.extend = function extendView(options) {
   return new View(options);
-}
+};
 
 export default View;

@@ -9,11 +9,15 @@
 </head>
 <body>
   <div id="app">
-    <h3 j-on:click="test">Title</h3>
+    <h3>Title</h3>
     {{ state.msg }}
     <p j-bind:html="state.htmlStr" j-if="state.showState"></p>
     <div class="todo-list">
-      <div j-for="todo in state.todos" class="todo-item">
+      <div
+        j-for="todo in state.todos"
+        class="todo-item"
+        j-on:click="test"
+      >
         {{ todo.value }}
       </div>
     </div>
